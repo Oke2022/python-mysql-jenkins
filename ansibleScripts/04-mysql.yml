@@ -5,8 +5,7 @@
   tasks:
     - name: Update server
       apt:
-        name: update
-        state: present
+        update_cache: yes
 
     - name: Install mysql
       apt:
