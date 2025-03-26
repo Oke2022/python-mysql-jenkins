@@ -9,13 +9,12 @@
         state: present
 
     - name: Download Jenkins key
-      task:
       get_url:
         url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
         dest: /usr/share/keyrings/jenkins-keyring.asc
 
     - name: Add Jenkins repository
-      ansible.builtin.apt_repository:
+      apt_repository:
         repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
         state: present
         filename: jenkins
