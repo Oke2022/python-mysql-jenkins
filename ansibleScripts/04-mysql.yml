@@ -12,7 +12,12 @@
       apt:
         name: mysql-server
         state: present
-
+   
+    - name: Enable mysql
+      service:
+        name: systemctl
+        state: started
+    
     - name: Enable mysql
       service:
         name: systemctl
