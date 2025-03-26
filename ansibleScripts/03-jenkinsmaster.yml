@@ -29,21 +29,4 @@
       ansible.builtin.apt:
         name: jenkins
         state: present
-
-
-
-
-- name: Create a directory on jenkins-node
-  hosts: jenkinsnode
-  become: yes
-  tasks:
-    - name: Install java jdk
-      yum:
-        name: java-11*
-        state: present
-
-    - name: Create a directory
-      file:
-        path: /home/ec2-user/jenkins
-        state: directory
 ...
