@@ -1,0 +1,49 @@
+---
+- name: Install Jenkins on Debian-based systems
+  hosts: jenkinsmaster
+  become: yes
+  tasks:
+    - name: Install java jdk
+      apt:
+        name: java-17*
+        state: present
+
+    - name: Download Jenkins key
+      task:
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        state: present
+        filename: jenkins
+
+    - name: Update package lists
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Jenkins
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+
+
+
+
+- name: Create a directory on jenkins-node
+  hosts: jenkinsnode
+  become: yes
+  tasks:
+    - name: Install java jdk
+      yum:
+        name: java-11*
+        state: present
+
+    - name: Create a directory
+      file:
+        path: /home/ec2-user/jenkins
+        state: directory
+...

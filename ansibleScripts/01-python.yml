@@ -1,20 +1,22 @@
 ---
 - name: Install httpd on all servers
-  hosts: all
-  become: true
+  hosts: mysql
+  become: yes
   tasks:
-    - name: Install HTTPD
-      yum:
-        name: httpd
+    - name: Install Python
+      apt:
+        name: python3
         state: present
 
-    - name: Start the service
-      service:
-        name: httpd
-        state: started
+    - name: Deploy Python script
+      copy:
+        src: system_stats.py
+        dest: /opt/system_stats.py
+        mode: '0755'
 
-    - name: Start the service
-      service:
-        name: httpd
-        enabled: yes
+    - name: Schedule with cron
+      cron:
+        name: "Run system stats script"
+        job: "/usr/bin/python3 /opt/system_stats.py >> /var/log/system_stats.log 2>&1"
+        minute: "*/5"
 ...

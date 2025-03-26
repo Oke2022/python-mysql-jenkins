@@ -1,0 +1,20 @@
+---
+- name: Install my sql on  SQL server
+  hosts: mysql
+  become: yes
+  tasks:
+    - name: Update server
+      apt:
+        name: update
+        state: present
+
+    - name: Install mysql
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Enable mysql
+      service:
+        name: systemctl
+        enable: yes
+...
