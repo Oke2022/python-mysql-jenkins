@@ -10,10 +10,9 @@
 
     - name: Download Jenkins key
       task:
-      ansible.builtin.get_url:
+      get_url:
         url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
         dest: /usr/share/keyrings/jenkins-keyring.asc
-        mode: '0644'
 
     - name: Add Jenkins repository
       ansible.builtin.apt_repository:
@@ -22,11 +21,11 @@
         filename: jenkins
 
     - name: Update package lists
-      ansible.builtin.apt:
+      apt:
         update_cache: yes
 
     - name: Install Jenkins
-      ansible.builtin.apt:
+      apt:
         name: jenkins
         state: present
 ...
