@@ -13,12 +13,7 @@
         state: present
    
     - name: Enable mysql
-      service:
-        name: systemctl
+      shell:
+        cmd: systemctl enable --now mysql
         state: started
-    
-    - name: Enable mysql
-      service:
-        name: systemctl
-        enable: yes
 ...
