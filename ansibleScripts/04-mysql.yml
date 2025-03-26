@@ -15,5 +15,5 @@
     - name: Enable mysql
       shell:
         cmd: systemctl enable --now mysql
-        state: started
+        
 ...
