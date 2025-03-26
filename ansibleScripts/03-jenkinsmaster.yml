@@ -5,7 +5,7 @@
   tasks:
     - name: Install java jdk
       apt:
-        name: java-17*
+        name: java-17-openjdk
         state: present
 
     - name: Download Jenkins key
