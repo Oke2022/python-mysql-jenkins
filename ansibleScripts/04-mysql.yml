@@ -12,8 +12,14 @@
         name: mysql-server
         state: present
    
-    - name: Enable mysql
-      shell:
-        cmd: systemctl enable --now mysql
-        
+    - name: Start MySQL service
+      service:
+        name: mysql
+        state: started
+
+    - name: Ensure MySQL service is enabled on boot
+      service:
+        name: mysql
+        enabled: yes
+
 ...
