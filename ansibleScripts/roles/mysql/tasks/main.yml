@@ -16,31 +16,6 @@
         name: python3-pymysql
         state: present
         update_cache: yes
-
-    - name: Create a MySQL database and user
-      shell: |
-        mysql -u root <<EOF
-        CREATE DATABASE system_stats;
-        CREATE USER 'monitor'@'%' IDENTIFIED BY 'password123';
-        GRANT ALL PRIVILEGES ON system_stats.* TO 'monitor'@'%';
-        FLUSH PRIVILEGES;
-        EOF
-      args:
-        executable: /bin/bash
-
-    - name: Update MySQL config to allow remote access
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
-        state: present
-
-    - name: Restart MySQL service
-      systemd:
-        name: mysql
-        state: restarted
-        enabled: yes
-
    
     - name: Create MySQL Table
       mysql_query:
