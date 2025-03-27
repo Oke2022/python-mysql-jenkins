@@ -25,19 +25,26 @@
         EOF
       args:
         executable: /bin/bash
+      ignore_errors: yes
 
-    - name: Create a MySQL database and user
-      shell: |
-        mysql -u root -pRootPassword123 <<EOF
-        CREATE DATABASE system_stats;
-        CREATE USER 'monitor'@'%' IDENTIFIED BY 'password123';
-        GRANT ALL PRIVILEGES ON system_stats.* TO 'monitor'@'%';
-        FLUSH PRIVILEGES;
-        EOF
-      args:
-        executable: /bin/bash
+    - name: Create system_stats database (if not exists)
+      mysql_db:
+        name: system_stats
+        state: present
+        login_user: root
+        login_password: RootPassword123
 
-    - name: Update MySQL config to allow remote access
+    - name: Create MySQL user 'monitor' (if not exists)
+      mysql_user:
+        name: monitor
+        password: password123
+        priv: "system_stats.*:ALL"
+        host: "%"
+        state: present
+        login_user: root
+        login_password: RootPassword123
+
+    - name: Ensure MySQL configuration allows remote connections
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
         regexp: '^bind-address'
