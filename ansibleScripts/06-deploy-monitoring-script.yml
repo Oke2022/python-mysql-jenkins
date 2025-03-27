@@ -1,0 +1,25 @@
+---
+- name: Deploy System Monitoring Script
+  hosts: monitoring_nodes
+  become: yes
+  tasks:
+    - name: Install required Python packages
+      pip:
+        name:
+          - psutil==5.9.0
+          - mysql-connector-python==8.0.32
+        executable: pip3
+
+    - name: Copy the monitoring script to the server
+      copy:
+        src: monitor_system.py
+        dest: /usr/local/bin/monitor_system.py
+        mode: '0755'
+
+    - name: Schedule script to run every 5 minutes
+      cron:
+        name: "System Monitoring"
+        job: "/usr/bin/python3 /usr/local/bin/monitor_system.py"
+        minute: "*/5"
+        
+...     

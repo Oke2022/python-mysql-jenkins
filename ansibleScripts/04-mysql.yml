@@ -22,4 +22,24 @@
         name: mysql
         enabled: yes
 
+    - name: Set root password
+      mysql_user:
+        name: root
+        host: localhost
+        password: "Admin"
+        state: present
+
+    - name: Create a database
+      mysql_db:
+        name: my_database
+        state: present
+
+    - name: Create a user
+      mysql_user:
+        name: my_user
+        host: localhost
+        password: "{{ my_user_password }}"
+        priv: 'my_database.*:ALL'
+        state: present
+
 ...
