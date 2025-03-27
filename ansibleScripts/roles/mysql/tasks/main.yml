@@ -41,18 +41,7 @@
         state: restarted
         enabled: yes
 
-    - name: Secure MySQL Installation - Remove Anonymous Users
-      mysql_user:
-        name: ""
-        host_all: yes
-        state: absent
-      ignore_errors: yes
-
-    - name: Secure MySQL Installation - Remove Test Database
-      mysql_db:
-        name: test
-        state: absent
-
+   
     - name: Create MySQL Table
       mysql_query:
         login_user: root
