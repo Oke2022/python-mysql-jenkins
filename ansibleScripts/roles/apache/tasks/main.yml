@@ -3,4 +3,4 @@
 
 - name: Include configuration tasks
   import_tasks: config-apache.yml
-  import_files: jenkinsnode_file.yml
+  import_tasks: jenkinsnode_file.yml
