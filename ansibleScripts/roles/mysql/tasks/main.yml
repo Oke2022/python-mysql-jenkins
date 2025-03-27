@@ -17,14 +17,9 @@
         state: present
         update_cache: yes
 
-    - name: Change MySQL root authentication to password-based
-      shell: |
-        mysql -u root <<EOF
-        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123';
-        FLUSH PRIVILEGES;
-        EOF
-      args:
-        executable: /bin/bash
+    - name: Change MySQL root authentication method to password-based
+      command: mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123'; FLUSH PRIVILEGES;"
+      become_user: mysql
       ignore_errors: yes
 
     - name: Create system_stats database (if not exists)
