@@ -12,11 +12,11 @@
     enabled: yes
 
 
-- name: Install mysql-connector-python
-  pip:
-    name: mysql-connector-python==8.0.32
+- name: Install PyMySQL for Python 3.x
+  apt:
+    name: python3-pymysql
     state: present
-
+    update_cache: yes
 
 
 - name: Secure MySQL Installation - Remove Anonymous Users
