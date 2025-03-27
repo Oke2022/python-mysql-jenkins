@@ -16,35 +16,37 @@
         name: python3-pymysql
         state: present
         update_cache: yes
-   
-    - name: Create MySQL Table
-      mysql_query:
-        login_user: root
-        query: |
-          CREATE TABLE IF NOT EXISTS system_stats.stats (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            cpu_usage FLOAT,
-            memory_usage FLOAT
-          );
-      ignore_errors: yes
 
-    - name: Create MySQL User
-      mysql_user:
-        name: monitor
-        password: password123
-        priv: "system_stats.*:ALL"
-        host: "%"
+    - name: Change MySQL root authentication to password-based
+      shell: |
+        mysql -u root <<EOF
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123';
+        FLUSH PRIVILEGES;
+        EOF
+      args:
+        executable: /bin/bash
+
+    - name: Create a MySQL database and user
+      shell: |
+        mysql -u root -pRootPassword123 <<EOF
+        CREATE DATABASE system_stats;
+        CREATE USER 'monitor'@'%' IDENTIFIED BY 'password123';
+        GRANT ALL PRIVILEGES ON system_stats.* TO 'monitor'@'%';
+        FLUSH PRIVILEGES;
+        EOF
+      args:
+        executable: /bin/bash
+
+    - name: Update MySQL config to allow remote access
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
         state: present
 
-    - name: Allow Remote Connections
-      replace:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address\s*=\s*127.0.0.1'
-        replace: 'bind-address = 0.0.0.0'
-
-    - name: Restart MySQL Service
+    - name: Restart MySQL service
       systemd:
         name: mysql
         state: restarted
+        enabled: yes
 ...
