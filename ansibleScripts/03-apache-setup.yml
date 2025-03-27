@@ -1,0 +1,8 @@
+---
+- name: Create a directory on jenkins-node
+  hosts: jenkinsnode
+  become: yes
+  roles:
+    - apache
+  
+...
