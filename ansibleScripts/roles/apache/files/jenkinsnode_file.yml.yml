@@ -1,0 +1,6 @@
+---
+    - name: Create a directory
+      file:
+        path: /home/ec2-user/jenkins
+        state: directory
+...

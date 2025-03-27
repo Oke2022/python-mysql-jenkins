@@ -1,0 +1,7 @@
+---
+    - name: Install java jdk
+      yum:
+        name: java-11*
+        state: present
+
+...
