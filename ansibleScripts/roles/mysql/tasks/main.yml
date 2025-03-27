@@ -1,7 +1,7 @@
 ---
 - name: Run MySQL commands as root user
-  hosts: mysql_server
-  become: true  # Use sudo to run the command as root
+  hosts: mysql
+  become: true 
   tasks:
     - name: Install MySQL Server
       apt:
