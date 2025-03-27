@@ -1,8 +1,4 @@
 ---
-- name: Install and Configure MySQL with Remote Access
-  hosts: mysql
-  become: true  # This ensures the tasks run as root
-  tasks:
     - name: Install MySQL Server
       apt:
         name: mysql-server
@@ -87,3 +83,4 @@
       systemd:
         name: mysql
         state: restarted
+...
