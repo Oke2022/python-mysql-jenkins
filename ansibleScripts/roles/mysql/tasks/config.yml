@@ -5,11 +5,12 @@
       register: download_key
       failed_when: download_key.rc != 0
       ignore_errors: yes
-      
+
     - name: Add MySQL APT repository
       apt_repository:
-        repo: 'deb http://repo.mysql.com/apt/ubuntu/ {{ ansible_distribution_release | lower }} mysql-8.0'
+        repo: 'deb [signed-by=/etc/apt/trusted.gpg.d/mysql.gpg] http://repo.mysql.com/apt/ubuntu/ {{ ansible_distribution_release | lower }} mysql-8.0'
         state: present
+
 
     - name: Update APT cache
       apt:
