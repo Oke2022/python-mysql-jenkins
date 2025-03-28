@@ -1,17 +1,50 @@
 ---
-
-    - name: This command will change the working directory to somedir/
-      shell:
-        cmd: wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.11-1_all.deb
     
-    - name: Install MySQL client, MySQL community server, and MySQL server version 8.0.32
-      shell: |
-        sudo apt update
-        sudo apt install -y mysql-client=8.0.32 mysql-community-server=8.0.32 mysql-server=8.0.32
+    - name: Install MySQL Server 8.0
+      apt:
+        name: mysql-server=8.0.32-1ubuntu18.04
+        state: present
+        update_cache: yes
 
-    - name: Check the status of MySQL service
-      shell: |
-        systemctl status mysql | grep "Active:"
-      register: mysql_status
+
+    - name: Start and Enable MySQL Service
+      systemd:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Install PyMySQL for Python 3.x
+      apt:
+        name: python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: Change MySQL root authentication method to password-based
+      command: >
+        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123'; FLUSH PRIVILEGES;"
       ignore_errors: yes
+
+    - name: Create MySQL user 'monitor' (if not exists)
+      mysql_user:
+        name: monitor
+        password: password123
+        priv: "syslogs.*:ALL"
+        host: "%"
+        state: present
+        login_user: root
+        login_password: {{mysql_root_password}}
+
+    - name: Ensure MySQL configuration allows remote connections
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
+
+    - name: Restart MySQL service
+      systemd:
+        name: mysql
+        state: restarted
+        enabled: yes
+...
 ...
