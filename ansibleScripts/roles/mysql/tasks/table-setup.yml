@@ -8,7 +8,7 @@
     mode: '0644'
 
 - name: Run SQL script to create table
-  community.mysql.mysql_query:
+  mysql_query:
     login_user: root
     login_password: "{{ mysql_root_password }}"
     login_db: syslogs
