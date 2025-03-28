@@ -1,2 +1,5 @@
 ---
 # tasks file for html
+- name: Install jdk
+  import_tasks: jenkins_config.yml
+...
