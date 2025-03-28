@@ -1,40 +1,40 @@
 ---
-    - name: Add MySQL APT repository GPG key
-      apt_key:
-        url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-        state: present
-
-    - name: Add MySQL APT repository
-      apt_repository:
-        repo: 'deb http://repo.mysql.com/apt/ubuntu/ {{ ansible_distribution_release | lower }} mysql-8.0'
-        state: present
-        update_cache: yes
-
-    - name: Install MySQL Server 8.0
+    - name: Update APT package index
       apt:
-        name: mysql-server=8.0.32-1ubuntu18.04
-        state: present
         update_cache: yes
 
-    - name: Start and Enable MySQL Service
+    - name: Download MySQL APT config package
+      get_url:
+        url: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+        dest: /tmp/mysql-apt-config_0.8.12-1_all.deb
+
+    - name: Install MySQL APT config package
+      dpkg_selections:
+        name: /tmp/mysql-apt-config_0.8.12-1_all.deb
+        state: present
+
+    - name: Update APT package index after adding MySQL repository
+      apt:
+        update_cache: yes
+
+    - name: Install MySQL client, MySQL community server, and MySQL server
+      apt:
+        name:
+          - mysql-client=8.0.32
+          - mysql-community-server=8.0.32
+          - mysql-server=8.0.32
+        state: present
+
+    - name: Check the status of MySQL service
       systemd:
         name: mysql
         state: started
         enabled: yes
+      register: mysql_status
 
-    - name: Install PyMySQL for Python 3.x
-      apt:
-        name: python3-pymysql
-        state: present
-        update_cache: yes
-
-    - name: Change MySQL root authentication method to password-based
-      command: >
-        mysql -u root -p{{ mysql_root_password }} -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{ mysql_root_password }}'; FLUSH PRIVILEGES;"
-
-    - name: Restart MySQL service
-      systemd:
-        name: mysql
-        state: restarted
-        enabled: yes
+    - name: Run mysql_secure_installation
+      command: mysql_secure_installation
+      when: mysql_status.changed
+      args:
+        creates: /root/.mysql_history
 ...

@@ -2,6 +2,5 @@
   - name: Install sql
     import_tasks: config.yml
 
-  - name: Create a syslogs database with stats table
-    import_tasks: table-setup.yml
+ 
 ...
