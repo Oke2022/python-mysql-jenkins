@@ -3,14 +3,15 @@
       apt:
         update_cache: yes
 
+ 
     - name: Download MySQL APT config package
       get_url:
-        url: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
-        dest: /tmp/mysql-apt-config_0.8.12-1_all.deb
+        url: https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-apt-config_0.8.17-1_all.deb
+        dest: /tmp/mysql-apt-config_0.8.17-1_all.deb
 
     - name: Install MySQL APT config package
       dpkg_selections:
-        name: /tmp/mysql-apt-config_0.8.12-1_all.deb
+        name: /tmp/mysql-apt-config_0.8.17-1_all.deb
         state: present
 
     - name: Update APT package index after adding MySQL repository
