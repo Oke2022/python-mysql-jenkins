@@ -3,6 +3,5 @@
   hosts: jenkinsnode
   become: yes
   roles:
-    - apache
-  
+    - java
 ...
