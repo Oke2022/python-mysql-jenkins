@@ -7,12 +7,16 @@
     group: root
     mode: '0644'
 
+- name: Read SQL file content
+  slurp:
+    src: /tmp/init_db.sql
+  register: sql_file_content
+
 - name: Run SQL script to create table
-  mysql_query:
+  community.mysql.mysql_query:
     login_user: root
     login_password: "{{ mysql_root_password }}"
-    login_db: syslogs
-    query: "{{ lookup('file', '/tmp/init_db.sql') }}"
+    query: "{{ sql_file_content['content'] | b64decode }}"
   become: yes
 ...
 
