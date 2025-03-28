@@ -32,7 +32,7 @@
         host: "%"
         state: present
         login_user: root
-        login_password: {{mysql_root_password}}
+        login_password: "{{mysql_root_password}}"
 
     - name: Ensure MySQL configuration allows remote connections
       lineinfile:
