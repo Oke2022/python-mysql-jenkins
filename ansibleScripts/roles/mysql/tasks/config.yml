@@ -1,5 +1,18 @@
 ---
-    
+    - name: Add MySQL APT repository GPG key
+      apt_key:
+        url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+        state: present
+
+    - name: Add MySQL APT repository
+      apt_repository:
+        repo: 'deb http://repo.mysql.com/apt/ubuntu/ {{ ansible_distribution_release | lower }} mysql-8.0'
+        state: present
+
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+        
     - name: Install MySQL Server 8.0
       apt:
         name: mysql-server=8.0.32-1ubuntu18.04
