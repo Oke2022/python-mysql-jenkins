@@ -1,0 +1,17 @@
+---
+- name: Copy SQL file to MySQL server
+  copy:
+    src: init_db.sql
+    dest: /tmp/init_db.sql
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Run SQL script to create table
+  community.mysql.mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_db: syslogs
+    query: "{{ lookup('file', '/tmp/init_db.sql') }}"
+...
+
