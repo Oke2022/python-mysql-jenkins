@@ -1,4 +1,8 @@
 ---
+- name: Add MySQL APT repository GPG key
+  apt_key:
+    url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    state: present
 
 - name: Add MySQL APT repository
   apt_repository:
@@ -27,7 +31,7 @@
   command: >
     mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{mysql_root_password}}'; FLUSH PRIVILEGES;"
     ignore_errors: yes
-    
+
 - name: Restart MySQL service
   systemd:
     name: mysql
