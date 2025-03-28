@@ -1,25 +1,36 @@
 ---
-    - name: Install MySQL Server
-      apt:
-        name: mysql-server
-        state: present
-        update_cache: yes
 
-    - name: Start and Enable MySQL Service
-      systemd:
-        name: mysql
-        state: started
-        enabled: yes
+- name: Add MySQL APT repository
+  apt_repository:
+    repo: 'deb http://repo.mysql.com/apt/ubuntu/ {{ ansible_distribution_release | lower }} mysql-8.0'
+    state: present
 
-    - name: Install PyMySQL for Python 3.x
-      apt:
-        name: python3-pymysql
-        state: present
-        update_cache: yes
+- name: Install MySQL Server 8.0
+  apt:
+    name: mysql-server=8.0.32-1ubuntu18.04
+    state: present
+    update_cache: yes
 
-    - name: Restart MySQL service
-      systemd:
-        name: mysql
-        state: restarted
-        enabled: yes
+- name: Start and Enable MySQL Service
+  systemd:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Install PyMySQL for Python 3.x
+  apt:
+    name: python3-pymysql
+    state: present
+    update_cache: yes
+
+- name: Change MySQL root authentication method to password-based
+  command: >
+    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{mysql_root_password}}'; FLUSH PRIVILEGES;"
+    ignore_errors: yes
+    
+- name: Restart MySQL service
+  systemd:
+    name: mysql
+    state: restarted
+    enabled: yes
 ...
