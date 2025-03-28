@@ -1,5 +1,5 @@
 ---
-- name: Create a directory on jenkins-node
+- name: Setup jenkins on jenkins server
   hosts: jenkinstest
   become: yes
   roles:
