@@ -4,4 +4,10 @@
         path: /home/ec2-user/jenkins
         state: directory
       when: ansible_distribution == "Amazon"
+
+    - name: Create a directory
+      file:
+        path: /home/ubuntu/jenkins
+        state: directory
+      when: ansible_distribution == "Ubuntu"
 ...

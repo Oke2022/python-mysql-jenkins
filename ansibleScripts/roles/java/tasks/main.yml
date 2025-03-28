@@ -1,7 +1,9 @@
 ---
 # tasks file for java
 
-- name: Include configuration tasks
-  import_tasks: config-apache.yml
-  
+- name: Install jdk
+  import_tasks: jdk-install.yml
+
+- name: Include configuration tasks for Jenkins node
+  import_tasks: jenkinsnode_file.yml
 ...
