@@ -1,6 +1,4 @@
 ---
 # tasks file for apache
 
-- name: Include configuration tasks
-  import_tasks: config-apache.yml
-  import_tasks: jenkinsnode_file.yml
+
