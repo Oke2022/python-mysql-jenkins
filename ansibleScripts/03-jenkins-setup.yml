@@ -1,0 +1,8 @@
+---
+- name: Create a directory on jenkins-node
+  hosts: jenkinstest
+  become: yes
+  roles:
+    - java
+    - jenkins
+...
