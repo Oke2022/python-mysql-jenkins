@@ -3,39 +3,18 @@
       apt:
         update_cache: yes
 
- 
-    - name: Download MySQL APT config package
-      get_url:
-        url: https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-apt-config_0.8.17-1_all.deb
-        dest: /tmp/mysql-apt-config_0.8.17-1_all.deb
-
-    - name: Install MySQL APT config package
-      dpkg_selections:
-        name: /tmp/mysql-apt-config_0.8.17-1_all.deb
-        state: present
-
-    - name: Update APT package index after adding MySQL repository
-      apt:
-        update_cache: yes
-
-    - name: Install MySQL client, MySQL community server, and MySQL server
-      apt:
-        name:
-          - mysql-client=8.0.32
-          - mysql-community-server=8.0.32
-          - mysql-server=8.0.32
-        state: present
+    - name: This command will change the working directory to somedir/
+      shell:
+        cmd: wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.11-1_all.deb
+    
+    - name: Install MySQL client, MySQL community server, and MySQL server version 8.0.32
+      shell: |
+        sudo apt update
+        sudo apt install -y mysql-client=8.0.32 mysql-community-server=8.0.32 mysql-server=8.0.32
 
     - name: Check the status of MySQL service
-      systemd:
-        name: mysql
-        state: started
-        enabled: yes
+      shell: |
+        systemctl status mysql | grep "Active:"
       register: mysql_status
-
-    - name: Run mysql_secure_installation
-      command: mysql_secure_installation
-      when: mysql_status.changed
-      args:
-        creates: /root/.mysql_history
+      ignore_errors: yes
 ...
