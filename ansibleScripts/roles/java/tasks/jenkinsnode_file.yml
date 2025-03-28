@@ -3,4 +3,5 @@
       file:
         path: /home/ec2-user/jenkins
         state: directory
+      when: ansible_distribution == "Amazon"
 ...
