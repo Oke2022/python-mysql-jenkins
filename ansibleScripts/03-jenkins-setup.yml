@@ -4,5 +4,4 @@
   become: yes
   roles:
     - java
-    - jenkins
 ...
