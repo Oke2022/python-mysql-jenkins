@@ -1,6 +1,6 @@
 ---
-  - name: Install sql
-    import_tasks: config.yml
-
+  
+  - name: Setup database and table
+    import_tasks: table-setup.yml
  
 ...
