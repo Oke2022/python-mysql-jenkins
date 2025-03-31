@@ -1,6 +1,6 @@
 ---
 - name: Create MySQL database
-  mysql_db:
+  community.mysql.mysql_db:
     name: syslogs
     state: present
     encoding: utf8mb4
