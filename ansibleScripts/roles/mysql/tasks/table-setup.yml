@@ -1,22 +1,23 @@
 ---
-- name: Copy SQL file to MySQL server
-  copy:
-    src: init_db.sql
-    dest: /tmp/init_db.sql
-    owner: root
-    group: root
-    mode: '0644'
+- name: Create MySQL database
+  community.mysql.mysql_db:
+    name: syslogs
+    state: present
+    encoding: utf8mb4
+    collation: utf8mb4_unicode_ci
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
 
-- name: Read SQL file content
-  slurp:
-    src: /tmp/init_db.sql
-  register: sql_file_content
-
-- name: Run SQL script to create table
+- name: Create MySQL table
   community.mysql.mysql_query:
     login_user: root
     login_password: "{{ mysql_root_password }}"
-    query: "{{ sql_file_content['content'] | b64decode }}"
-  become: yes
+    db: syslogs
+    query: |
+      CREATE TABLE IF NOT EXISTS stats (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          timestamp DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+          cpu_usage FLOAT NOT NULL,
+          memory_usage FLOAT NOT NULL
+      );
 ...
-
