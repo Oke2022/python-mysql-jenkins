@@ -2,6 +2,7 @@
 - hosts: app_servers
   become: yes
   roles:
+    - install_cron
     - python
     - deploy_script
 ...
