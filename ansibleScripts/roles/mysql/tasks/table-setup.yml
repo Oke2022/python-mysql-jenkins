@@ -1,10 +1,8 @@
 ---
 - name: Create MySQL database
   community.mysql.mysql_db:
-    name: syslogs
+    name: system_stats
     state: present
-    encoding: utf8mb4
-    collation: utf8mb4_unicode_ci
     login_user: root
     login_password: "{{ mysql_root_password }}"
 
@@ -12,13 +10,13 @@
   community.mysql.mysql_query:
     login_user: root
     login_password: "{{ mysql_root_password }}"
+    db: system_stats
     query: |
-      USE syslogs;
       CREATE TABLE IF NOT EXISTS stats (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          timestamp DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
-          cpu_usage FLOAT NOT NULL,
-          memory_usage FLOAT NOT NULL
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+          cpu_usage FLOAT,
+          memory_usage FLOAT
       );
 
 ...
