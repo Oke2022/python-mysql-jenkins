@@ -1,11 +1,12 @@
 ---
+
     - name: Update APT cache
       apt:
         update_cache: yes
 
-    - name: Install MySQL Server 8.0
+    - name: Install MySQL Server
       apt:
-        name: mysql-server=8.0.32-1ubuntu18.04
+        name: mysql-server
         state: present
         update_cache: yes
 
