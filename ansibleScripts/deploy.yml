@@ -1,0 +1,7 @@
+---
+- hosts: app_servers
+  become: yes
+  roles:
+    - python
+    - deploy_script
+...

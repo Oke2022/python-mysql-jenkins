@@ -1,2 +1,14 @@
 ---
 # tasks file for roles/deploy_script
+- name: Copy script
+  copy:
+    src: files/log_stats.py
+    dest: /usr/local/bin/log_stats.py
+    mode: '0755'
+
+- name: Set up cron job
+  cron:
+    name: "Run system stats script"
+    job: "/usr/bin/python3 /usr/local/bin/log_stats.py >> /var/log/log_stats.log 2>&1"
+    minute: "*/5"
+...

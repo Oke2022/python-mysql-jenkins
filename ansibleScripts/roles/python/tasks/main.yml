@@ -1,2 +1,8 @@
 ---
 # tasks file for python
+
+- name: Install Python
+  yum:
+    name: python3
+    state: present
+...
