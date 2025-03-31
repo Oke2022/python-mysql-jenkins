@@ -7,7 +7,18 @@
     collation: utf8mb4_unicode_ci
     login_user: root
     login_password: "{{ mysql_root_password }}"
-
-
+    
+- name: add sample data to database  
+  copy: 
+    src: init_db.sql 
+    dest: /tmp/init_db.sql  
+     
+- name: insert sample data into database  
+  mysql_db: 
+    name: syslogs 
+    state: import 
+    target: /tmp/init_db.sql 
+    login_user: root 
+    login_password: "{{ mysql_root_password }}"
 
 ...
