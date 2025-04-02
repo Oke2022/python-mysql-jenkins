@@ -4,7 +4,7 @@ import datetime
 import os
 
 db = mysql.connector.connect(
-    host=os.getenv("DB_HOST", "localhost"),
+    host=os.getenv("DB_HOST", "172.31.31.235"),
     user=os.getenv("DB_USER", "devops"),
     password=os.getenv("DB_PASS", "password"),
     database=os.getenv("DB_NAME", "syslogs")
