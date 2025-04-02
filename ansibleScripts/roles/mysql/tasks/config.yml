@@ -23,15 +23,12 @@
         state: present
         update_cache: yes
 
-    - name: Change MySQL root authentication method to password-based
-      command: >
-        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123'; FLUSH PRIVILEGES;"
-      ignore_errors: yes
+   
 
-    - name: Create MySQL user 'monitor' (if not exists)
+    - name: Create MySQL user 'devops' (if not exists)
       mysql_user:
-        name: monitor
-        password: password123
+        name: devops
+        password: password
         priv: "syslogs.*:ALL"
         host: "%"
         state: present
@@ -42,7 +39,7 @@
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
         regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
+        line: 'bind-address = 172.31.28.117,172.31.19.130'
         state: present
 
     - name: Restart MySQL service
