@@ -1,0 +1,30 @@
+---
+- name: Install httpd on all servers
+  hosts: app_servers
+  become: true
+  tasks:
+    - name: Install HTTPD
+      yum:
+        name: httpd
+        state: present
+
+    - name: Start the service
+      service:
+        name: httpd
+        state: started
+
+    - name: Start the service
+      service:
+        name: httpd
+        enabled: yes
+
+    - name: Install git
+      yum:
+        name: git
+        state: present
+
+    - name: Host code
+      git:
+        repo: https://github.com/CeeyIT-Solutions/food3.git
+        dest: /var/www/html
+...
