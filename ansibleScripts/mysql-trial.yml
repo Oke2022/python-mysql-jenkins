@@ -19,10 +19,6 @@
         state: started
         enabled: yes
   
-    - name: Change MySQL root authentication method to password-based
-      command: >
-        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password123'; FLUSH PRIVILEGES;"
-      ignore_errors: yes
 
     - name: Create MySQL user 'devops' (if not exists)
       mysql_user:
@@ -32,7 +28,7 @@
         host: "%"
         state: present
         login_user: root
-        login_password: password123
+        login_password: RootPassword123
     - name: Enable remote login to mysql
       lineinfile:
          path: /etc/mysql/mysql.conf.d/mysqld.cnf
