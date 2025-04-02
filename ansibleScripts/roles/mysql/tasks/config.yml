@@ -23,12 +23,15 @@
         state: present
         update_cache: yes
 
-   
+    - name: Change MySQL root authentication method to password-based
+      command: >
+        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123'; FLUSH PRIVILEGES;"
+      ignore_errors: yes
 
     - name: Create MySQL user 'devops' (if not exists)
       mysql_user:
-        name: devops
-        password: password
+        name: monitor
+        password: "{{mysql_devops_password}}"
         priv: "syslogs.*:ALL"
         host: "%"
         state: present

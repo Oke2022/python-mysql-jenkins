@@ -1,3 +1,4 @@
 ---
 # vars file for roles/mysql
 mysql_root_password: "RootPassword123"
+mysql_devops_password: "password"

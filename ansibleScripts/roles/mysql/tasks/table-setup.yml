@@ -3,10 +3,8 @@
   mysql_db:
     name: syslogs
     state: present
-    encoding: utf8mb4
-    collation: utf8mb4_unicode_ci
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+    login_user: devops
+    login_password: "{{ mysql_devops_password }}"
     
 - name: add sample data to database  
   copy: 
@@ -18,7 +16,7 @@
     name: syslogs 
     state: import 
     target: /tmp/init_db.sql 
-    login_user: root 
-    login_password: "{{ mysql_root_password }}"
+    login_user: devops 
+    login_password: "{{ mysql_devops_password }}"
 
 ...
