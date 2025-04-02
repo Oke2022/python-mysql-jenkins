@@ -1,5 +1,43 @@
 ---
 
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install MySQL Server
+      apt:
+        name: mysql-server
+        state: present
+        update_cache: yes
+
+
+    - name: Start and Enable MySQL Service
+      systemd:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Install PyMySQL for Python 3.x
+      apt:
+        name: python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: Change MySQL root authentication method to password-based
+      command: >
+        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'RootPassword123'; FLUSH PRIVILEGES;"
+      ignore_errors: yes
+
+    - name: Create MySQL user 'devops' (if not exists)
+      mysql_user:
+        name: monitor
+        password: "{{mysql_devops_password}}"
+        priv: "syslogs.*:ALL"
+        host: "%"
+        state: present
+        login_user: root
+        login_password: "{{mysql_root_password}}"
+
     - name: Ensure MySQL configuration allows remote connections
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
