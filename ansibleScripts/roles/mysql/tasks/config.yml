@@ -30,7 +30,7 @@
 
     - name: Create MySQL user 'devops' (if not exists)
       mysql_user:
-        name: monitor
+        name: devops
         password: "{{mysql_devops_password}}"
         priv: "syslogs.*:ALL"
         host: "%"

@@ -1,0 +1,49 @@
+- name: setup Mysql with medium_db db and remote login
+  become: yes
+  hosts: mysql
+  tasks:
+    - name: Installing Mysql  and dependencies
+      package:
+       name: "{{item}}"
+       state: present
+       update_cache: yes
+      loop:
+       - mysql-server
+       - mysql-client 
+       - python3-mysqldb
+       - libmysqlclient-dev
+      become: yes
+    - name: start and enable mysql service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+  
+    - name: Change MySQL root authentication method to password-based
+      command: >
+        mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password123'; FLUSH PRIVILEGES;"
+      ignore_errors: yes
+
+    - name: Create MySQL user 'devops' (if not exists)
+      mysql_user:
+        name: devops
+        password: password
+        priv: "syslogs.*:ALL"
+        host: "%"
+        state: present
+        login_user: root
+        login_password: password123
+    - name: Enable remote login to mysql
+      lineinfile:
+         path: /etc/mysql/mysql.conf.d/mysqld.cnf
+         regexp: '^bind-address'
+         line: 'bind-address = 0.0.0.0'
+         backup: yes
+      notify:
+         - Restart mysql
+  handlers:
+    - name: Restart mysql
+      service:
+        name: mysql
+        state: restarted
+...
