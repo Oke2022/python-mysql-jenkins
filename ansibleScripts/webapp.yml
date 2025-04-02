@@ -22,6 +22,10 @@
       yum:
         name: git
         state: present
+      
+    - name: Install git
+      shell:
+        cmd: rm -rf /var/www/html
 
     - name: Host code
       git:
