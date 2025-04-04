@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git(
-                    url 'https://github.com/Oke2022/python-mysql-jenkins.git'
+                    url: 'https://github.com/Oke2022/python-mysql-jenkins.git'
                     branch: 'main', 
                     credentialsId: 'github-jenkins', 
                     
