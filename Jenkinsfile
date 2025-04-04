@@ -14,22 +14,6 @@ pipeline {
             }
         }
 
-        stage('Install Python & Ansible') {
-            steps {
-                sh '''
-                sudo apt-get update
-                sudo apt-get install -y python3 python3-pip ansible zip curl unzip
-                pip3 install -r requirements.txt || true
-                
-                # Install AWS CLI manually
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                sudo ./aws/install
-                aws --version
-                '''
-            }
-        }
-
 
         stage('SonarQube Analysis') {
             steps {
