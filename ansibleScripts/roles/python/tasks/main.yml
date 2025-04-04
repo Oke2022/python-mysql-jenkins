@@ -13,6 +13,15 @@
 
 - name: Install psutil-5.9.0 and mysql-connector-python==8.0.32
   shell:
-    cmd: /usr/bin/python3 -m pip install psutil==5.9.0 mysql-connector-python==8.0.32 --force-reinstall
+    cmd: /usr/bin/python3 -m pip install psutil==5.9.0 mysql-connector-python==8.0.32
 
+- name: Restart httpd
+  systemd:
+    name: httpd
+    state: restarted
+
+- name: Install mysql client mariadb105
+  yum:
+    name: mariadb105
+    state: present
 ...
