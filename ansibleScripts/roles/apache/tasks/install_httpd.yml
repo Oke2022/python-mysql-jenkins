@@ -1,0 +1,16 @@
+---
+    - name: Install HTTPD
+      yum:
+        name: httpd
+        state: present
+
+    - name: Start the service
+      service:
+        name: httpd
+        state: started
+
+    - name: Start the service
+      service:
+        name: httpd
+        enabled: yes
+...

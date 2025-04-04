@@ -1,4 +1,8 @@
 ---
 # tasks file for apache
 
+ - name: Setup httpd
+   import_tasks: install_httpd.yml
 
+ - name: Install git and clone repo
+   import_tasks: clone.yml

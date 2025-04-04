@@ -1,0 +1,16 @@
+---
+    - name: Install git
+      yum:
+        name: git
+        state: present
+      
+    - name: Install git
+      shell:
+        cmd: rm -rf /var/www/html
+
+    - name: Host code
+      git:
+        repo: https://github.com/CeeyIT-Solutions/food3.git
+        dest: /var/www/html
+
+...
