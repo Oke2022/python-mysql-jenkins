@@ -10,7 +10,9 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Oke2022/python-mysql-jenkins.git'
+                git branch: 'main', 
+                credentialsId: 'github-jenkins', 
+                url 'https://github.com/Oke2022/python-mysql-jenkins.git'
             }
         }
 
@@ -36,6 +38,12 @@ pipeline {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     sh 'sonar-scanner'
                 }
+            }
+        }
+
+        stage('Test Report') {
+            steps {
+                junit '**/target/surefire-reports/*.xml'  // Publish JUnit test results
             }
         }
 
