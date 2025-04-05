@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.12'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.aws:/root/.aws'
+        }
+    }
 
     environment {
         SCANNER_HOME = tool 'Sonar-scanner'
@@ -11,7 +16,7 @@ pipeline {
     }
 
     stages {
-        stage ('Checkout') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -20,19 +25,19 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                # Check if Python is installed
-                python3 --version || (echo "Python not found" && exit 1)
-                
-                # Install python3-venv if not available (may require sudo)
-                dpkg -l | grep python3-venv || sudo apt-get update && sudo apt-get install -y python3-venv python3-full
+                # Check Python version
+                python --version
                 
                 # Create a virtual environment
-                python3 -m venv venv
+                python -m venv venv
                 
                 # Activate the virtual environment and install dependencies
                 . venv/bin/activate
                 pip install --upgrade pip
                 pip install psutil mysql-connector-python unittest-xml-reporting
+                
+                # Add AWS CLI and Ansible for later stages
+                pip install awscli ansible
                 
                 # Verify installations
                 pip list
@@ -78,8 +83,10 @@ pipeline {
         stage('Deploy Python Script using Ansible') {
             steps {
                 sh '''
-                # Activate the virtual environment for Ansible if needed
+                # Activate the virtual environment for Ansible
                 . venv/bin/activate
+                
+                # Run Ansible playbook
                 ansible-playbook -i ansibleScripts/host.ini ansibleScripts/deploy.yml
                 '''
             }
@@ -98,8 +105,10 @@ pipeline {
             }
             steps {
                 sh '''
-                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                # Activate the virtual environment where AWS CLI is installed
+                . venv/bin/activate
+                
+                # Upload to S3
                 aws s3 cp ${ARTIFACT_NAME} s3://$S3_BUCKET/${ARTIFACT_NAME}
                 '''
             }
