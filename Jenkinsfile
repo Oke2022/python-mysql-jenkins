@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'EC2-docker-auto' }
+    agent any
 
     environment {
         SONARQUBE_ENV = 'MySonarQube'
