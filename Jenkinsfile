@@ -20,28 +20,48 @@ pipeline {
         stage('Setup Python') {
             steps {
                 sh '''
-                # Check if Python is installed
-                which python3 || sudo apt-get update && sudo apt-get install -y python3
+                # Method 1: Try to use python3 -m pip instead of pip3 directly
+                python3 -m pip --version || echo "Python3 pip module not found"
                 
-                # Check if pip is installed
-                which pip3 || sudo apt-get install -y python3-pip
+                # Method 2: Try to find pip3 in common locations
+                /usr/bin/pip3 --version || echo "pip3 not found in /usr/bin"
+                /usr/local/bin/pip3 --version || echo "pip3 not found in /usr/local/bin"
                 
-                # Verify installations
+                # Method 3: If all else fails, install pip for the current user
+                if ! command -v pip3 &> /dev/null && command -v python3 &> /dev/null; then
+                    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+                    python3 get-pip.py --user
+                    export PATH=$HOME/.local/bin:$PATH
+                    echo "PATH now includes: $PATH"
+                fi
+                
+                # Check if installation was successful
                 python3 --version
-                pip3 --version
+                python3 -m pip --version || echo "Still can't find pip module"
+                
+                # Show where pip might be installed
+                find $HOME/.local -name pip3 2>/dev/null || echo "No pip3 in ~/.local"
                 '''
             }
         }
         
         stage('Run Tests') {
             steps {
-                // Install dependencies directly without virtual environment
                 sh '''
-                # Install required packages if not available
-                pip3 install --user psutil mysql-connector-python unittest-xml-reporting
+                # Try multiple ways to install packages
+                # Method 1: Using python3 -m pip
+                python3 -m pip install --user psutil mysql-connector-python unittest-xml-reporting || echo "Failed python3 -m pip install"
+                
+                # Method 2: Try to use pip directly with the full path (if found)
+                if [ -f "$HOME/.local/bin/pip3" ]; then
+                    $HOME/.local/bin/pip3 install --user psutil mysql-connector-python unittest-xml-reporting
+                fi
                 
                 # Create directory for test reports
                 mkdir -p target/surefire-reports
+                
+                # Make sure Python can find the user-installed packages
+                export PYTHONPATH=$HOME/.local/lib/python3*/site-packages:$PYTHONPATH
                 
                 # Run the tests
                 python3 test_system_stats.py
