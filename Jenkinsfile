@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.12'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.aws:/root/.aws'
-        }
-    }
+    agent any
 
     environment {
         SCANNER_HOME = tool 'Sonar-scanner'
@@ -16,7 +11,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage ('Checkout') {
             steps {
                 checkout scm
             }
@@ -25,19 +20,22 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                # Check Python version
-                python --version
+                # Check if Python is installed
+                python3 --version || (echo "Python not found" && exit 1)
                 
-                # Create a virtual environment
-                python -m venv venv
+                # Create a virtual environment (without requiring sudo)
+                # Using --without-pip if venv fails
+                python3 -m venv venv || python3 -m venv --without-pip venv
                 
-                # Activate the virtual environment and install dependencies
+                # Activate the virtual environment
                 . venv/bin/activate
+                
+                # If pip is not available, bootstrap it
+                which pip || curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
+                
+                # Install dependencies
                 pip install --upgrade pip
                 pip install psutil mysql-connector-python unittest-xml-reporting
-                
-                # Add AWS CLI and Ansible for later stages
-                pip install awscli ansible
                 
                 # Verify installations
                 pip list
@@ -83,10 +81,8 @@ pipeline {
         stage('Deploy Python Script using Ansible') {
             steps {
                 sh '''
-                # Activate the virtual environment for Ansible
+                # Activate the virtual environment for Ansible if needed
                 . venv/bin/activate
-                
-                # Run Ansible playbook
                 ansible-playbook -i ansibleScripts/host.ini ansibleScripts/deploy.yml
                 '''
             }
@@ -105,10 +101,8 @@ pipeline {
             }
             steps {
                 sh '''
-                # Activate the virtual environment where AWS CLI is installed
-                . venv/bin/activate
-                
-                # Upload to S3
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
                 aws s3 cp ${ARTIFACT_NAME} s3://$S3_BUCKET/${ARTIFACT_NAME}
                 '''
             }
