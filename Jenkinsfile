@@ -16,14 +16,24 @@ pipeline {
         }
         
     
-        
         stage('SonarQube Analysis') {
+             environment {
+                SONAR_TOKEN = credentials('jenkins-token')
+                SONAR_URL = 'http://3.235.222.19:9000'
+            }
             steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh 'sonar-scanner'
+                withSonarQubeEnv('MySonarQube') {
+                sh """
+                    sonar-scanner \
+                    -Dsonar.projectKey=python-mysql-jenkins \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=$SONAR_URL \
+                    -Dsonar.login=$SONAR_TOKEN
+                """
                 }
             }
         }
+
 
         stage('Test Report') {
             steps {
