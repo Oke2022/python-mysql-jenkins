@@ -67,7 +67,9 @@ class TestSystemStats(unittest.TestCase):
         # Execute the script in our namespace with mocks
         try:
             exec(script_content, test_globals)
-            # Success means the script executed without errors
+            
+            # Explicitly call the main function
+            test_globals['main']()
             
             # Check that database operations were performed correctly
             mock_cursor.execute.assert_called_once_with(
@@ -122,6 +124,9 @@ class TestSystemStats(unittest.TestCase):
         try:
             exec(script_content, test_globals)
             
+            # Explicitly call the main function
+            test_globals['main']()
+            
             # Verify the connection was attempted with correct parameters
             mock_db_connect.assert_called_once_with(
                 host="test-host",
@@ -160,6 +165,9 @@ class TestSystemStats(unittest.TestCase):
             # Execute the script in our namespace with mocks
             try:
                 exec(script_content, test_globals)
+                
+                # Explicitly call the main function
+                test_globals['main']()
                 
                 # Verify the connection was attempted with default parameters
                 mock_db_connect.assert_called_once_with(
