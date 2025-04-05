@@ -9,7 +9,9 @@ pipeline {
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
     }
-
+    tools {
+    sonarScanner 'MySonarQube' // Make sure this matches your configured tool name
+}
 
     stages {
         stage ('Checkout') {
@@ -21,9 +23,10 @@ pipeline {
     
         stage('SonarQube Analysis') {
             steps {
+                 withSonarQubeEnv('MySonarQube') {
                 script {
                 sh """
-                    sonar-scanner \
+                ${tool 'SonarScanner'}/bin/sonar-scanner \
                     -Dsonar.projectKey=python-mysql-jenkins \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=$SONAR_URL \
