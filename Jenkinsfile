@@ -10,7 +10,7 @@ pipeline {
         S3_BUCKET = 'syslogs-bkt'
     }
     tools {
-    sonarScanner 'MySonarQube' // Make sure this matches your configured tool name
+    sonarScanner 'Sonar-scanner' // Make sure this matches your configured tool name
 }
 
     stages {
@@ -23,14 +23,13 @@ pipeline {
     
         stage('SonarQube Analysis') {
             steps {
-                 withSonarQubeEnv('MySonarQube') {
+                 withSonarQubeEnv('SonarQube') {
                 script {
                 sh """
-                ${tool 'SonarScanner'}/bin/sonar-scanner \
-                    -Dsonar.projectKey=python-mysql-jenkins \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=$SONAR_URL \
-                    -Dsonar.login=sqp_ba52335784a97a76821f0ced5b24af457117fde5
+                ${tool 'sonarScanner'}/bin/sonar-scanner \
+                -Dsonar.projectKey=python-mysql-jenkins \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=$SONAR_URL \
                 """
                 }
             }
