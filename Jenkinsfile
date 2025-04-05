@@ -10,10 +10,6 @@ pipeline {
         S3_BUCKET = 'syslogs-bkt'
     }
 
-    tools {
-        sonarScanner 'Sonar-scanner' // This is correct but case matters
-    }
-
     stages {
         stage ('Checkout') {
             steps {
