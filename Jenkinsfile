@@ -17,6 +17,22 @@ pipeline {
             }
         }
         
+        stage('Setup Python') {
+            steps {
+                sh '''
+                # Check if Python is installed
+                which python3 || sudo apt-get update && sudo apt-get install -y python3
+                
+                # Check if pip is installed
+                which pip3 || sudo apt-get install -y python3-pip
+                
+                # Verify installations
+                python3 --version
+                pip3 --version
+                '''
+            }
+        }
+        
         stage('Run Tests') {
             steps {
                 // Install dependencies directly without virtual environment
