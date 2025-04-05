@@ -2,7 +2,10 @@ pipeline {
     agent any
 
     environment {
+        SCANNER_HOME = tool 'Sonar-scanner'
         SONARQUBE_ENV = 'MySonarQube'
+        SONAR_TOKEN = credentials('jenkins-token')
+        SONAR_URL = 'http://3.235.222.19:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
     }
@@ -17,14 +20,9 @@ pipeline {
         
     
         stage('SonarQube Analysis') {
-             environment {
-                SONAR_TOKEN = credentials('jenkins-token')
-                SONAR_URL = 'http://3.235.222.19:9000'
-            }
             steps {
-                withSonarQubeEnv('MySonarQube') {
-                sh """
-                    sonar-scanner \
+                withSonarQubeEnv($SONARQUBE_ENV) {
+                sh """$SCANNER_HOME/bin/sonar-scanner \
                     -Dsonar.projectKey=python-mysql-jenkins \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=$SONAR_URL \
