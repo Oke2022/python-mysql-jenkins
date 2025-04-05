@@ -21,7 +21,7 @@ pipeline {
     
         stage('SonarQube Analysis') {
             steps {
-                scripts {
+                script {
                 sh """
                     sonar-scanner \
                     -Dsonar.projectKey=python-mysql-jenkins \
