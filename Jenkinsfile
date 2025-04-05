@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'EC2-docker-auto' }
 
     environment {
         SONARQUBE_ENV = 'MySonarQube'
@@ -7,14 +7,23 @@ pipeline {
         S3_BUCKET = 'syslogs-bkt'
     }
 
-    stages {
-        stage('Checkout Code') {
+
+        stage('Install Python & Ansible') {
             steps {
-                 checkout scm
+                sh '''
+                sudo apt-get update
+                sudo apt-get install -y python3 python3-pip ansible zip curl unzip
+                pip3 install -r requirements.txt || true
+                
+                # Install AWS CLI manually
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                unzip awscliv2.zip
+                sudo ./aws/install
+                aws --version
+                '''
             }
         }
-
-
+        
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
