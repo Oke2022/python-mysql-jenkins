@@ -21,20 +21,16 @@ pipeline {
             steps {
                 sh '''
                 # Check if Python is installed
-                python3 --version || (echo "Python not found" && exit 1)
+                python3 --version
                 
-                # Create a virtual environment (without requiring sudo)
-                # Using --without-pip if venv fails
-                python3 -m venv venv || python3 -m venv --without-pip venv
+                # Create a virtual environment
+                python3 -m venv venv
                 
                 # Activate the virtual environment
                 . venv/bin/activate
                 
-                # If pip is not available, bootstrap it
-                which pip || curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py
-                
-                # Install dependencies
-                pip install --upgrade pip
+                # Check if pip is working and install dependencies
+                pip --version && pip install --upgrade pip
                 pip install psutil mysql-connector-python unittest-xml-reporting
                 
                 # Verify installations
