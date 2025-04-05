@@ -2,15 +2,26 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 import datetime
-import xmlrunner  # This is needed for XML output compatible with Jenkins
-
-# Import the script as a module (assuming it's saved as system_stats.py)
-# If your script has a different name, adjust the import statements accordingly
 import sys
-sys.path.append('.')  # Add current directory to path if needed
+
+# Try to import xmlrunner, but provide a fallback if it's not available
+try:
+    import xmlrunner
+    XML_RUNNER_AVAILABLE = True
+except ImportError:
+    XML_RUNNER_AVAILABLE = False
+    print("Warning: xmlrunner not available, using standard unittest runner")
+
+# Add current directory to path
+sys.path.append('.')
 
 class TestSystemStats(unittest.TestCase):
     
+    def setUp(self):
+        # Verify the script file exists
+        self.script_file = 'system_stats.py'
+        self.assertTrue(os.path.exists(self.script_file), f"Script file {self.script_file} does not exist")
+        
     @patch('psutil.cpu_percent')
     @patch('psutil.virtual_memory')
     @patch('mysql.connector.connect')
@@ -37,33 +48,38 @@ class TestSystemStats(unittest.TestCase):
         mock_connection.cursor.return_value = mock_cursor
         mock_db_connect.return_value = mock_connection
         
-        # Import and run the script's main function
-        # We'll use exec to evaluate the script content instead of importing
-        # This lets us test the script without requiring it to be structured as a module
-        script_content = open('system_stats.py').read()
-        # Replace the execution code with a function to be called
-        script_content = script_content.replace('db = mysql.connector.connect', 
-                                             'def main():\n    db = mysql.connector.connect')
-        # Add indentation to the rest of the file
-        script_content = script_content.replace('\n', '\n    ')
-        # Add a return statement to get the output
-        script_content = script_content + '\n    return timestamp, cpu, mem'
+        # Create test globals namespace with mocks
+        test_globals = {
+            'psutil': MagicMock(),
+            'mysql': MagicMock(),
+            'datetime': mock_datetime,
+            'os': os,
+            'print': print  # Allow print statements to work
+        }
+        test_globals['psutil'].cpu_percent = mock_cpu_percent
+        test_globals['psutil'].virtual_memory = mock_virtual_memory
+        test_globals['mysql'].connector.connect = mock_db_connect
         
-        # Create a namespace and execute the modified script
-        namespace = {}
-        exec(script_content, namespace)
+        # Read the script content
+        with open(self.script_file, 'r') as f:
+            script_content = f.read()
         
-        # Call the main function we created
-        timestamp, cpu, mem = namespace['main']()
-        
-        # Verify the database interactions
-        mock_cursor.execute.assert_called_once_with(
-            "INSERT INTO stats (timestamp, cpu_usage, memory_usage) VALUES (%s, %s, %s)",
-            (test_timestamp, 45.2, 72.5)
-        )
-        mock_connection.commit.assert_called_once()
-        mock_cursor.close.assert_called_once()
-        mock_connection.close.assert_called_once()
+        # Execute the script in our namespace with mocks
+        try:
+            exec(script_content, test_globals)
+            # Success means the script executed without errors
+            
+            # Check that database operations were performed correctly
+            mock_cursor.execute.assert_called_once_with(
+                "INSERT INTO stats (timestamp, cpu_usage, memory_usage) VALUES (%s, %s, %s)",
+                (test_timestamp, 45.2, 72.5)
+            )
+            mock_connection.commit.assert_called_once()
+            mock_cursor.close.assert_called_once()
+            mock_connection.close.assert_called_once()
+            
+        except Exception as e:
+            self.fail(f"Script execution failed: {e}")
 
     @patch('os.getenv')
     @patch('mysql.connector.connect')
@@ -82,18 +98,29 @@ class TestSystemStats(unittest.TestCase):
         mock_getenv.side_effect = getenv_side_effect
         
         # Mock the database connection
-        mock_db_connect.return_value = MagicMock()
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
+        mock_db_connect.return_value = mock_connection
         
-        # Test using exec approach to handle the script as-is
-        script_content = open('system_stats.py').read()
-        # Execute in a namespace with our mocks
-        namespace = {'os': os, 'mysql': MagicMock(), 'psutil': MagicMock(), 
-                    'datetime': MagicMock()}
-        namespace['mysql'].connector.connect = mock_db_connect
+        # Create test globals namespace with mocks
+        test_globals = {
+            'psutil': MagicMock(),
+            'mysql': MagicMock(),
+            'datetime': MagicMock(),
+            'os': os,
+            'print': print
+        }
+        test_globals['os'].getenv = mock_getenv
+        test_globals['mysql'].connector.connect = mock_db_connect
         
+        # Read the script content
+        with open(self.script_file, 'r') as f:
+            script_content = f.read()
+        
+        # Execute the script in our namespace with mocks
         try:
-            exec(script_content, namespace)
-            # If we get here, the script ran without errors
+            exec(script_content, test_globals)
             
             # Verify the connection was attempted with correct parameters
             mock_db_connect.assert_called_once_with(
@@ -111,18 +138,28 @@ class TestSystemStats(unittest.TestCase):
         # Create a clean environment for testing defaults
         with patch.dict(os.environ, {}, clear=True):
             # Mock the database connection
-            mock_db_connect.return_value = MagicMock()
+            mock_connection = MagicMock()
+            mock_cursor = MagicMock()
+            mock_connection.cursor.return_value = mock_cursor
+            mock_db_connect.return_value = mock_connection
             
-            # Test using exec approach
-            script_content = open('system_stats.py').read()
-            # Execute in a namespace with our mocks
-            namespace = {'os': os, 'mysql': MagicMock(), 'psutil': MagicMock(), 
-                        'datetime': MagicMock()}
-            namespace['mysql'].connector.connect = mock_db_connect
+            # Create test globals namespace with mocks
+            test_globals = {
+                'psutil': MagicMock(),
+                'mysql': MagicMock(),
+                'datetime': MagicMock(),
+                'os': os,
+                'print': print
+            }
+            test_globals['mysql'].connector.connect = mock_db_connect
             
+            # Read the script content
+            with open(self.script_file, 'r') as f:
+                script_content = f.read()
+            
+            # Execute the script in our namespace with mocks
             try:
-                exec(script_content, namespace)
-                # If we get here, the script ran without errors
+                exec(script_content, test_globals)
                 
                 # Verify the connection was attempted with default parameters
                 mock_db_connect.assert_called_once_with(
@@ -134,14 +171,18 @@ class TestSystemStats(unittest.TestCase):
             except Exception as e:
                 self.fail(f"Script execution failed: {e}")
 
+
 if __name__ == '__main__':
     # Create target directory for test reports
     os.makedirs('target/surefire-reports', exist_ok=True)
     
-    # Run tests with XMLRunner to generate reports in JUnit format
-    unittest.main(
-        testRunner=xmlrunner.XMLTestRunner(output='target/surefire-reports'),
-        failfast=False,
-        buffer=False,
-        catchbreak=False
-    )
+    # Run tests with XMLRunner if available, otherwise use standard runner
+    if XML_RUNNER_AVAILABLE:
+        unittest.main(
+            testRunner=xmlrunner.XMLTestRunner(output='target/surefire-reports'),
+            failfast=False,
+            buffer=False,
+            catchbreak=False
+        )
+    else:
+        unittest.main()

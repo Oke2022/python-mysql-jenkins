@@ -8,7 +8,6 @@ pipeline {
         SONAR_URL = 'http://3.235.222.19:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
-        PYTHON_VENV = 'venv'
     }
 
     stages {
@@ -18,21 +17,18 @@ pipeline {
             }
         }
         
-        stage('Setup Python Environment') {
-            steps {
-                sh '''
-                python3 -m venv ${PYTHON_VENV}
-                . ${PYTHON_VENV}/bin/activate
-                pip install psutil mysql-connector-python unittest-xml-reporting
-                '''
-            }
-        }
-        
         stage('Run Tests') {
             steps {
+                // Install dependencies directly without virtual environment
                 sh '''
-                . ${PYTHON_VENV}/bin/activate
-                python test_system_stats.py
+                # Install required packages if not available
+                pip3 install --user psutil mysql-connector-python unittest-xml-reporting
+                
+                # Create directory for test reports
+                mkdir -p target/surefire-reports
+                
+                # Run the tests
+                python3 test_system_stats.py
                 '''
             }
         }
@@ -47,10 +43,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh """
-                    ${SCANNER_HOME}/bin/sonar-scanner \
-                    -Dsonar.projectKey=python-mysql-jenkins \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=${SONAR_URL} \
+                    ${SCANNER_HOME}/bin/sonar-scanner \\
+                    -Dsonar.projectKey=python-mysql-jenkins \\
+                    -Dsonar.sources=. \\
+                    -Dsonar.host.url=${SONAR_URL} \\
                     -Dsonar.python.coverage.reportPaths=target/surefire-reports/coverage.xml
                     """
                 }
@@ -87,10 +83,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: "${ARTIFACT_NAME}", fingerprint: true
-            cleanWs(cleanWhenNotBuilt: false,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true,
-                    patterns: [[pattern: '${PYTHON_VENV}/**', type: 'EXCLUDE']])
+            cleanWs()
         }
     }
 }
