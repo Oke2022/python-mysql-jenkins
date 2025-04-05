@@ -8,12 +8,38 @@ pipeline {
         SONAR_URL = 'http://3.235.222.19:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
+        PYTHON_VENV = 'venv'
     }
 
     stages {
         stage ('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        
+        stage('Setup Python Environment') {
+            steps {
+                sh '''
+                python3 -m venv ${PYTHON_VENV}
+                . ${PYTHON_VENV}/bin/activate
+                pip install psutil mysql-connector-python unittest-xml-reporting
+                '''
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                sh '''
+                . ${PYTHON_VENV}/bin/activate
+                python test_system_stats.py
+                '''
+            }
+        }
+        
+        stage('Test Report') {
+            steps {
+                junit 'target/surefire-reports/*.xml'  // Publish JUnit test results
             }
         }
         
@@ -24,15 +50,10 @@ pipeline {
                     ${SCANNER_HOME}/bin/sonar-scanner \
                     -Dsonar.projectKey=python-mysql-jenkins \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=${SONAR_URL}
+                    -Dsonar.host.url=${SONAR_URL} \
+                    -Dsonar.python.coverage.reportPaths=target/surefire-reports/coverage.xml
                     """
                 }
-            }
-        }
-
-        stage('Test Report') {
-            steps {
-                junit '**/target/surefire-reports/*.xml'  // Publish JUnit test results
             }
         }
 
@@ -44,7 +65,7 @@ pipeline {
 
         stage('Zip Script and Config') {
             steps {
-                sh 'zip -r ${ARTIFACT_NAME} ansibleScripts/roles/deploy_script/files/ ansibleScripts/deploy.yml'
+                sh 'zip -r ${ARTIFACT_NAME} ansibleScripts/roles/deploy_script/files/ ansibleScripts/deploy.yml system_stats.py test_system_stats.py target/surefire-reports/'
             }
         }
 
@@ -66,6 +87,10 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: "${ARTIFACT_NAME}", fingerprint: true
+            cleanWs(cleanWhenNotBuilt: false,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true,
+                    patterns: [[pattern: '${PYTHON_VENV}/**', type: 'EXCLUDE']])
         }
     }
 }
