@@ -21,12 +21,13 @@ pipeline {
     
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv($SONARQUBE_ENV) {
-                sh """$SCANNER_HOME/bin/sonar-scanner \
+                scripts {
+                sh """
+                    sonar-scanner \
                     -Dsonar.projectKey=python-mysql-jenkins \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=$SONAR_URL \
-                    -Dsonar.login=$SONAR_TOKEN
+                    -Dsonar.login=sqp_ba52335784a97a76821f0ced5b24af457117fde5
                 """
                 }
             }
