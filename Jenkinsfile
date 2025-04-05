@@ -74,15 +74,25 @@ pipeline {
             }
         }
 
+
         stage('Deploy Python Script using Ansible') {
             steps {
                 sh '''
-                # Activate the virtual environment for Ansible if needed
+                # Activate the virtual environment
                 . venv/bin/activate
+                
+                # Install Ansible inside virtual environment
+                pip install ansible
+                
+                # Run the Ansible playbook
                 ansible-playbook -i ansibleScripts/host.ini ansibleScripts/deploy.yml
                 '''
             }
         }
+
+
+
+
 
         stage('Zip Script and Config') {
             steps {
