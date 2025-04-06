@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'python-agent'
-    }
+    agent any
 
     environment {
         SCANNER_HOME = tool 'Sonar-scanner'
@@ -19,21 +17,24 @@ pipeline {
             }
         }
         
-        stage('Install Dependencies') {
+        stage('Setup Python Environment') {
             steps {
                 sh '''
                 # Check if Python is installed
                 python3 --version
                 
-                # Install system dependencies if needed
-                sudo apt-get update -y || true
-                sudo apt-get install -y python3-pip python3-psutil || true
+                # Create a virtual environment
+                python3 -m venv venv
                 
-                # Install Python dependencies directly
-                pip3 install psutil mysql-connector-python unittest-xml-reporting
+                # Activate the virtual environment
+                . venv/bin/activate
+                
+                # Install dependencies
+                pip install --upgrade pip
+                pip install psutil mysql-connector-python unittest-xml-reporting
                 
                 # Install Ansible for deployment
-                pip3 install ansible
+                pip install ansible
                 '''
             }
         }
@@ -41,11 +42,14 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
+                # Activate the virtual environment
+                . venv/bin/activate
+                
                 # Create directory for test reports
                 mkdir -p target/surefire-reports
                 
                 # Run the tests
-                python3 test_system_stats.py
+                python test_system_stats.py
                 '''
             }
         }
@@ -73,6 +77,9 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'ssh-private-key', variable: 'SSH_KEY')]) {
                     sh '''
+                    # Activate the virtual environment
+                    . venv/bin/activate
+                    
                     # Copy the SSH key to a location Ansible can use
                     mkdir -p ~/.ssh
                     cp $SSH_KEY ~/.ssh/id_rsa
