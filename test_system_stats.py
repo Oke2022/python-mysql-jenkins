@@ -1,38 +1,45 @@
-
 import unittest
-import os
+import system_stats
+from unittest.mock import patch, MagicMock
+from io import StringIO
+import sys
 
-class TestSystemStats(unittest.TestCase):
-    """Basic tests for system_stats.py that don't require external dependencies."""
+class SystemStatsTest(unittest.TestCase):
     
-    def test_script_exists(self):
-        """Verify that the system_stats.py file exists."""
-        self.assertTrue(os.path.exists("system_stats.py"), 
-                       "system_stats.py file exists")
-    
-    def test_script_has_required_imports(self):
-        """Verify that the script contains the required import statements."""
-        with open("system_stats.py", "r") as file:
-            content = file.read()
-            self.assertIn("import psutil", content, 
-                         "Script should import psutil")
-            self.assertIn("import mysql.connector", content, 
-                         "Script should import mysql.connector")
-            self.assertIn("import datetime", content, 
-                         "Script should import datetime")
-    
-    def test_script_has_database_connection(self):
-        """Verify that the script attempts to connect to a database."""
-        with open("system_stats.py", "r") as file:
-            content = file.read()
-            self.assertIn("mysql.connector.connect", content, 
-                         "Script should connect to MySQL database")
-            self.assertIn("INSERT INTO", content, 
-                         "Script should contain an INSERT statement")
+    @patch('mysql.connector.connect')
+    @patch('psutil.cpu_percent')
+    @patch('psutil.virtual_memory')
+    def test_main_function(self, mock_virtual_memory, mock_cpu_percent, mock_db_connect):
+        # Mock the CPU and memory values
+        mock_cpu_percent.return_value = 50.0
+        mock_memory = MagicMock()
+        mock_memory.percent = 60.0
+        mock_virtual_memory.return_value = mock_memory
+        
+        # Mock the database connection
+        mock_cursor = MagicMock()
+        mock_db = MagicMock()
+        mock_db.cursor.return_value = mock_cursor
+        mock_db_connect.return_value = mock_db
+        
+        # Capture the standard output
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        # Run the function
+        system_stats.main()
+        
+        # Restore standard output
+        sys.stdout = sys.__stdout__
+        
+        # Verify the database interaction
+        self.assertTrue(mock_cursor.execute.called, "Database query was not executed")
+        self.assertTrue(mock_db.commit.called, "Database commit was not called")
+        
+        # Verify output contains CPU and memory values
+        output = captured_output.getvalue()
+        self.assertIn("CPU: 50.0%", output)
+        self.assertIn("MEM: 60.0%", output)
 
-if __name__ == "__main__":
-    # Create directory for test reports
-    os.makedirs("target/surefire-reports", exist_ok=True)
-    
-    # Run the tests
+if __name__ == '__main__':
     unittest.main()
