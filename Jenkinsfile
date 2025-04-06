@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        lable 'python-agent'
+        label 'python-agent'
     }
 
     environment {
