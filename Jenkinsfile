@@ -75,7 +75,7 @@ pipeline {
 
         stage('Deploy Python Script using Ansible') {
             steps {
-                withCredentials([file(credentialsId: 'ssh-private-key', variable: 'SSH_KEY')]) {
+                withCredentials([file(credentialsId: 'jenkins-access-keypair', variable: 'SSH_KEY')]) {
                     sh '''
                     # Activate the virtual environment
                     . venv/bin/activate
