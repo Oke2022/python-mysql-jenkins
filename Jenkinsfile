@@ -8,6 +8,9 @@ pipeline {
         SONAR_URL = 'http://3.235.222.19:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+        SSH_CREDENTIALS = credentials('jenkins-access-keypair')
     }
 
     stages {
@@ -75,7 +78,7 @@ pipeline {
 
         stage('Deploy Python Script using Ansible') {
             steps {
-                withCredentials([file(credentialsId: 'jenkins-access-keypair', variable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-access-keypair', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     # Activate the virtual environment
                     . venv/bin/activate
@@ -104,10 +107,6 @@ pipeline {
         }
 
         stage('Upload ZIP to S3') {
-            environment {
-                AWS_ACCESS_KEY_ID = credentials('aws-access-key')
-                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
-            }
             steps {
                 sh '''
                 aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
