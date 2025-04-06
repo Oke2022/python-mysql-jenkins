@@ -17,52 +17,40 @@ pipeline {
             }
         }
         
-        stage('Setup Environment') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                # Check Python environment
-                echo "Checking Python installation..."
-                which python || which python3 || echo "Python not found"
+                # Check if Python is installed
+                python3 --version
                 
-                # Create directory for test reports
-                mkdir -p target/surefire-reports
+                # Install system dependencies if needed
+                sudo apt-get update -y || true
+                sudo apt-get install -y python3-pip python3-psutil || true
                 
-                # Create a basic test report file in case tests can't run
-                echo '<?xml version="1.0" encoding="UTF-8"?>
-                <testsuites>
-                  <testsuite name="SystemStats" tests="1" errors="0" failures="0" skip="0">
-                    <testcase classname="SystemStats" name="placeholder_test"/>
-                  </testsuite>
-                </testsuites>' > target/surefire-reports/dummy-test.xml
+                # Install Python dependencies directly
+                pip3 install psutil mysql-connector-python unittest-xml-reporting
                 
-                # Create a simple test file that doesn't require dependencies
-                echo 'import unittest
-                
-                class SimpleTest(unittest.TestCase):
-                    def test_system_stats_script_exists(self):
-                        """Test that the system_stats.py file exists."""
-                        import os
-                        self.assertTrue(os.path.exists("system_stats.py"), 
-                                      "system_stats.py file exists")
-                
-                if __name__ == "__main__":
-                    unittest.main()' > simple_test.py
+                # Install Ansible for deployment
+                pip3 install ansible
                 '''
             }
         }
         
-        stage('Run Basic Tests') {
+        stage('Run Tests') {
             steps {
                 sh '''
-                # Run simple tests that don't require dependencies
-                python simple_test.py || python3 simple_test.py || echo "Tests couldn't run, but continuing"
+                # Create directory for test reports
+                mkdir -p target/surefire-reports
+                
+                # Run the tests
+                python3 test_system_stats.py
                 '''
             }
         }
         
         stage('Test Report') {
             steps {
-                junit 'target/surefire-reports/*.xml'  // Publish JUnit test results
+                junit 'target/surefire-reports/*.xml'
             }
         }
         
@@ -81,46 +69,27 @@ pipeline {
 
         stage('Deploy Python Script using Ansible') {
             steps {
-                sh '''
-                if command -v ansible-playbook &> /dev/null; then
+                withCredentials([file(credentialsId: 'ssh-private-key', variable: 'SSH_KEY')]) {
+                    sh '''
+                    # Copy the SSH key to a location Ansible can use
+                    mkdir -p ~/.ssh
+                    cp $SSH_KEY ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    
+                    # Run the Ansible playbook
                     ansible-playbook -i ansibleScripts/host.ini ansibleScripts/deploy.yml
-                else
-                    echo "Ansible not found, skipping deployment"
-                fi
-                '''
+                    
+                    # Clean up
+                    rm -f ~/.ssh/id_rsa
+                    '''
+                }
             }
         }
 
         stage('Zip Script and Config') {
             steps {
                 sh '''
-                # Create the necessary directories if they don't exist
-                mkdir -p ansibleScripts/roles/deploy_script/files/ 2>/dev/null || true
-                
-                # Copy the main script to the ansible files directory if it exists
-                if [ ! -d "ansibleScripts/roles/deploy_script/files/" ]; then
-                    mkdir -p ansibleScripts/roles/deploy_script/files/
-                fi
-                
-                cp system_stats.py ansibleScripts/roles/deploy_script/files/ 2>/dev/null || true
-                
-                # Create a basic deploy.yml if it doesn't exist
-                if [ ! -f "ansibleScripts/deploy.yml" ]; then
-                    mkdir -p ansibleScripts
-                    echo "---
-                    - name: Deploy System Stats Script
-                      hosts: all
-                      tasks:
-                        - name: Copy script
-                          copy:
-                            src: roles/deploy_script/files/system_stats.py
-                            dest: /opt/system_stats.py
-                            mode: '0755'
-                    " > ansibleScripts/deploy.yml
-                fi
-                
-                # Create the zip file
-                zip -r ${ARTIFACT_NAME} system_stats.py test_system_stats.py target/surefire-reports/ ansibleScripts/ || echo "Zip creation failed but continuing"
+                zip -r ${ARTIFACT_NAME} system_stats.py test_system_stats.py target/surefire-reports/ ansibleScripts/
                 '''
             }
         }
@@ -132,13 +101,9 @@ pipeline {
             }
             steps {
                 sh '''
-                if command -v aws &> /dev/null; then
-                    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                    aws s3 cp ${ARTIFACT_NAME} s3://$S3_BUCKET/${ARTIFACT_NAME} || echo "S3 upload failed but continuing"
-                else
-                    echo "AWS CLI not found, skipping S3 upload"
-                fi
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                aws s3 cp ${ARTIFACT_NAME} s3://$S3_BUCKET/${ARTIFACT_NAME}
                 '''
             }
         }
@@ -146,7 +111,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: "${ARTIFACT_NAME}", allowEmptyArchive: true, fingerprint: true
+            archiveArtifacts artifacts: "${ARTIFACT_NAME}", fingerprint: true
             cleanWs()
         }
     }
