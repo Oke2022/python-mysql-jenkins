@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        lable 'python-agent'
+    }
 
     environment {
         SCANNER_HOME = tool 'Sonar-scanner'
