@@ -3,6 +3,7 @@ import system_stats
 from unittest.mock import patch, MagicMock
 from io import StringIO
 import sys
+import xmlrunner
 
 class SystemStatsTest(unittest.TestCase):
     
@@ -42,4 +43,10 @@ class SystemStatsTest(unittest.TestCase):
         self.assertIn("MEM: 60.0%", output)
 
 if __name__ == '__main__':
-    unittest.main()
+    # Use XMLTestRunner instead of the default TextTestRunner
+    unittest.main(
+        testRunner=xmlrunner.XMLTestRunner(output='target/surefire-reports'),
+        failfast=False,
+        buffer=False,
+        catchbreak=False
+    )
