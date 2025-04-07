@@ -1,16 +1,26 @@
 ---
-    - name: Install HTTPD
-      yum:
-        name: httpd
-        state: present
 
-    - name: Start the service
-      service:
-        name: httpd
-        state: started
+- name: Install web server (Amazon Linux/RHEL)
+  yum:
+    name: httpd
+    state: present
+  when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
 
-    - name: Start the service
-      service:
-        name: httpd
-        enabled: yes
+- name: Install web server (Ubuntu/Debian)
+  apt:
+    name: apache2
+    state: present
+  when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+
+- name: Restart web server (Amazon Linux/RHEL)
+  systemd:
+    name: httpd
+    state: restarted
+  when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
+
+- name: Restart web server (Ubuntu/Debian)
+  systemd:
+    name: apache2
+    state: restarted
+  when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
 ...
