@@ -8,46 +8,22 @@
         yum:
           name: python3
           state: present
-        when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
-
-      - name: Install Python (Ubuntu/Debian)
-        apt:
-          name: python3
-          state: present
-          update_cache: yes
-        when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+        when: ansible_facts['distribution'] in ['Amazon', 'Fedora', 'RedHat', 'CentOS']
 
       - name: Install Python pip (Amazon Linux/RHEL)
         yum:
           name: python3-pip
           state: present
-        when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
-
-      - name: Install Python pip (Ubuntu/Debian)
-        apt:
-          name: python3-pip
-          state: present
-        when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+        when: ansible_facts['distribution'] in ['Amazon', 'Fedora', 'RedHat', 'CentOS']
 
       - name: Install psutil-5.9.0 and mysql-connector-python==8.0.32
         shell:
           cmd: /usr/bin/python3 -m pip install psutil==5.9.0 mysql-connector-python==8.0.32
-        when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
-
-      - name: Install Python packages in user mode (Ubuntu)
-        shell:
-          cmd: /usr/bin/python3 -m pip install --user psutil==5.9.0 mysql-connector-python==8.0.32
-        when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+        when: ansible_facts['distribution'] in ['Amazon', 'Fedora', 'RedHat', 'CentOS']
 
       - name: Install MySQL client (Amazon Linux/RHEL)
         yum:
           name: mariadb105
           state: present
-        when: ansible_facts['distribution'] in ['Amazon', 'RedHat', 'CentOS']
-
-      - name: Install MySQL client (Ubuntu/Debian)
-        apt:
-          name: mariadb-client
-          state: present
-        when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
+        when: ansible_facts['distribution'] in ['Amazon', 'Fedora', 'RedHat', 'CentOS']
 ...
