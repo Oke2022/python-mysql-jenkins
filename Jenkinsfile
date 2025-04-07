@@ -5,7 +5,7 @@ pipeline {
         SCANNER_HOME = tool 'Sonar-scanner'
         SONARQUBE_ENV = 'MySonarQube'
         SONAR_TOKEN = credentials('jenkins-token')
-        SONAR_URL = 'http://44.200.64.181:9000'
+        SONAR_URL = 'http://35.170.82.140:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
         AWS_ACCESS_KEY_ID = credentials('aws-access-key')
