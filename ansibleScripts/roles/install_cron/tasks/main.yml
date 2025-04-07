@@ -1,27 +1,28 @@
 ---
-# tasks file for roles/install_cron
-- name: Install cron (Ubuntu)
-  apt:
-    name: cron
-    state: present
-  when: ansible_os_family == "Debian"
 
-- name: Install cronie (CentOS)
-  yum:
-    name: cronie
-    state: present
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Amazon"
+    - name: Install cron (Ubuntu)
+      apt:
+        name: cron
+        state: present
+      when: ansible_os_family == "Debian"
 
-- name: Ensure cron service is running (Ubuntu)
-  service:
-    name: cron
-    state: started
-    enabled: yes
-  when: ansible_os_family == "Debian"
+    - name: Install cronie (CentOS)
+      yum:
+        name: cronie
+        state: present
+      when: ansible_os_family == "RedHat" or ansible_os_family == "Amazon"
 
-- name: Ensure crond service is running (CentOS)
-  service:
-    name: crond
-    state: started
-    enabled: yes
-  when: ansible_os_family == "RedHat" or ansible_os_family == "Amazon"
+    - name: Ensure cron service is running (Ubuntu)
+      service:
+        name: cron
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure crond service is running (CentOS)
+      service:
+        name: crond
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat" or ansible_os_family == "Amazon"
+...

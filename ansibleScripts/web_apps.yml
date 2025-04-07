@@ -1,5 +1,5 @@
 - name: Install httpd on all servers
-  hosts: app1
+  hosts: app_servers
   become: true
   roles:
     - apache
