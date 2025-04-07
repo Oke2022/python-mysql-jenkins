@@ -10,7 +10,7 @@
   yum:
     name: cronie
     state: present
-  when: ansible_os_family == "RedHat" or nsible_os_family == "Amazon"
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Amazon"
 
 - name: Ensure cron service is running (Ubuntu)
   service:
