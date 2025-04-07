@@ -76,23 +76,14 @@ pipeline {
         //     }
         // }
 
+
         stage('Deploy Python Script using Ansible') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-access-keypair', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
-                    # Activate the virtual environment
                     . venv/bin/activate
                     
-                    # Copy the SSH key to a location Ansible can use
-                    mkdir -p ~/.ssh
-                    cp $SSH_KEY ~/.ssh/id_rsa
-                    chmod 600 ~/.ssh/id_rsa
-                    
-                    # Run the Ansible playbook
-                    ansible-playbook -i ansibleScripts/host.ini ansibleScripts/deploy.yml
-                    
-                    # Clean up
-                    rm -f ~/.ssh/id_rsa
+                    ssh -i $SSH_KEY ec2-user@172.31.23.4 "cd /python-mysql-jenkins/ansibleScripts && ansible-playbook -i host.ini deploy.yml"
                     '''
                 }
             }
