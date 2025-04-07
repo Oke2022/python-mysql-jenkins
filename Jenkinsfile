@@ -83,7 +83,9 @@ pipeline {
                     sh '''
                     . venv/bin/activate
                     
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ec2-user@172.31.23.4 "cd python-mysql-jenkins/ansibleScripts && ansible-playbook -i host.ini deploy.yml"
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY ec2-user@172.31.23.4 "cd python-mysql-jenkins/ansibleScripts 
+                    && ansible-playbook -i host.ini deploy.yml 
+                    && ansible-playbook -i host.ini deploy.yml"
                     '''
                 }
             }
