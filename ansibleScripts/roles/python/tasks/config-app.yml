@@ -37,7 +37,6 @@
       - name: Install Python packages in user mode (Ubuntu)
         shell:
           cmd: /usr/bin/python3 -m pip install --user psutil==5.9.0 mysql-connector-python==8.0.32
-          become: no  # Run as the regular user, not root
         when: ansible_facts['distribution'] in ['Ubuntu', 'Debian']
 
       - name: Install MySQL client (Amazon Linux/RHEL)
