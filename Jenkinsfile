@@ -113,9 +113,6 @@ pipeline {
             archiveArtifacts artifacts: "${ARTIFACT_NAME}", fingerprint: true
             cleanWs()
         }
-    }
-
-    post {
         success {
             emailext (
                 subject: "✅ SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
@@ -135,5 +132,4 @@ pipeline {
             )
         }
     }
-
 }
