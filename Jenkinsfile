@@ -63,18 +63,18 @@ pipeline {
             }
         }
         
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    ${SCANNER_HOME}/bin/sonar-scanner \\
-                    -Dsonar.projectKey=python-mysql-jenkins \\
-                    -Dsonar.sources=. \\
-                    -Dsonar.host.url=${SONAR_URL}
-                    """
-                }
-            }
-        }
+	  // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv('SonarQube') {
+        //             sh """
+        //             ${SCANNER_HOME}/bin/sonar-scanner \\
+        //             -Dsonar.projectKey=python-mysql-jenkins \\
+        //             -Dsonar.sources=. \\
+        //             -Dsonar.host.url=${SONAR_URL}
+        //             """
+        //         }
+        //     }
+        // }
 
 
         stage('Deploy Python Script using Ansible') {

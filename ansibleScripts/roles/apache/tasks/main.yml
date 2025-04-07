@@ -4,5 +4,5 @@
  - name: Setup httpd
    import_tasks: install_httpd.yml
 
- - name: Install git and clone repo
-   import_tasks: clone.yml
+ - name: Deploy web page
+   import_tasks: display_names.yml

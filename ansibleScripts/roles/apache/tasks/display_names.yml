@@ -1,0 +1,11 @@
+---
+    - name: Remove unwanted files
+      shell:
+        cmd: rm -rf /var/www/html
+
+    - name: Copy script
+      copy:
+        src: files/index.html
+        dest: /var/www/html/
+...
+
