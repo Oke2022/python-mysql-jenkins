@@ -5,7 +5,7 @@ pipeline {
         SCANNER_HOME = tool 'Sonar-scanner'
         SONARQUBE_ENV = 'MySonarQube'
         SONAR_TOKEN = credentials('jenkins-token')
-        SONAR_URL = 'http://35.170.82.140:9000'
+        SONAR_URL = 'http://3.236.223.97:9000'
         ARTIFACT_NAME = 'python-script-bundle.zip'
         S3_BUCKET = 'syslogs-bkt'
         AWS_ACCESS_KEY_ID = credentials('aws-access-key')
@@ -23,21 +23,11 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                # Check if Python is installed
                 python3 --version
-                
-                # Create a virtual environment
                 python3 -m venv venv
-                
-                # Activate the virtual environment
                 . venv/bin/activate
-                
-                # Install dependencies
                 pip install --upgrade pip
                 pip install psutil mysql-connector-python unittest-xml-reporting
-                
-                # Install Ansible for deployment
-                pip install ansible
                 '''
             }
         }
@@ -45,13 +35,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                # Activate the virtual environment
                 . venv/bin/activate
-                
-                # Create directory for test reports
                 mkdir -p target/surefire-reports
-                
-                # Run the tests
                 python test_system_stats.py
                 '''
             }
@@ -63,18 +48,18 @@ pipeline {
             }
         }
         
-	  // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('SonarQube') {
-        //             sh """
-        //             ${SCANNER_HOME}/bin/sonar-scanner \\
-        //             -Dsonar.projectKey=python-mysql-jenkins \\
-        //             -Dsonar.sources=. \\
-        //             -Dsonar.host.url=${SONAR_URL}
-        //             """
-        //         }
-        //     }
-        // }
+	  stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \\
+                    -Dsonar.projectKey=python-mysql-jenkins \\
+                    -Dsonar.sources=. \\
+                    -Dsonar.host.url=${SONAR_URL}
+                    """
+                }
+            }
+        }
 
 
         stage('Deploy Python Script using Ansible') {
@@ -82,7 +67,6 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-access-keypair', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     . venv/bin/activate
-                    
                     ssh -o StrictHostKeyChecking=no -i $SSH_KEY ec2-user@172.31.23.4 "cd python-mysql-jenkins/ansibleScripts && ansible-playbook -i host.ini deploy.yml"
                     '''
                 }
